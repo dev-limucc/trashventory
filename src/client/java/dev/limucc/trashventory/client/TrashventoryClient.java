@@ -132,7 +132,7 @@ public class TrashventoryClient implements ClientModInitializer {
         int left = (screen.width - imageWidth) / 2;
         int top = (screen.height - imageHeight) / 2;
         Screens.getWidgets(screen).add(new GearButton(
-                left + imageWidth / 2 - 6, top + 3, 12, 12, GEAR_SPRITES,
+                left + imageWidth / 2 - 6, top + 3, 13, 13, GEAR_SPRITES,   // 1:1 with the 13px sprite (crisp)
                 b -> client.setScreen(new TrashventoryScreen(null))));
         return true;
     }
