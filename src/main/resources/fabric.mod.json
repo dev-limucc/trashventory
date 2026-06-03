@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "trashventory",
+  "version": "${version}",
+  "name": "Trashventory",
+  "description": "Server-side /trash bin that deletes dumped items after a configurable delay. Works for vanilla clients. The optional client mod adds a one-click inventory button, a smooth settings GUI, a personal (shorter-only) timer, and an auto-delete item blacklist.",
+  "authors": ["Limucc-dev"],
+  "contact": {
+    "sources": "https://github.com/dev-limucc/trashventory"
+  },
+  "license": "MIT",
+  "icon": "assets/trashventory/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main":    ["dev.limucc.trashventory.Trashventory"],
+    "client":  ["dev.limucc.trashventory.client.TrashventoryClient"],
+    "modmenu": ["dev.limucc.trashventory.client.ModMenuIntegration"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.2",
+    "minecraft":    "~26.1",
+    "java":         ">=25",
+    "fabric-api":   "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
