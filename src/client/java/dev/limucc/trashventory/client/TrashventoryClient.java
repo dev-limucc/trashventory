@@ -57,7 +57,7 @@ public class TrashventoryClient implements ClientModInitializer {
             Minecraft mc = Minecraft.getInstance();
             mc.execute(() -> {
                 trashContainerId = payload.containerId();
-                addGearIfTrash(mc, mc.screen);   // bin may already be on screen when this arrives
+                addGearIfTrash(mc, mc.gui.screen());   // bin may already be on screen when this arrives
             });
         });
 
@@ -68,14 +68,14 @@ public class TrashventoryClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (OPEN_TRASH_KEY.consumeClick()) {
-                if (mc.screen == null && mc.getConnection() != null) mc.getConnection().sendCommand("trash");
+                if (mc.gui.screen() == null && mc.getConnection() != null) mc.getConnection().sendCommand("trash");
             }
             while (OPEN_SETTINGS_KEY.consumeClick()) {
-                if (mc.screen == null) mc.setScreen(new TrashventoryScreen(null));
+                if (mc.gui.screen() == null) mc.gui.setScreen(new TrashventoryScreen(null));
             }
             // Forget the trash container id once that bin is no longer the open screen, so a later chest
             // that happens to reuse the same numeric id can't inherit the gear.
-            if (trashContainerId != -1 && !isTrashScreen(mc.screen)) trashContainerId = -1;
+            if (trashContainerId != -1 && !isTrashScreen(mc.gui.screen())) trashContainerId = -1;
         });
 
         // The server pushes our authoritative settings on join, so we don't send anything here.
@@ -133,7 +133,7 @@ public class TrashventoryClient implements ClientModInitializer {
         int top = (screen.height - imageHeight) / 2;
         Screens.getWidgets(screen).add(new GearButton(
                 left + imageWidth / 2 - 6, top + 3, 13, 13, GEAR_SPRITES,   // 1:1 with the 13px sprite (crisp)
-                b -> client.setScreen(new TrashventoryScreen(null))));
+                b -> client.gui.setScreen(new TrashventoryScreen(null))));
         return true;
     }
 
