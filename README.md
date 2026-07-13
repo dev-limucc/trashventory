@@ -4,6 +4,12 @@ A Fabric mod for **Minecraft 26.1.2** that adds a personal `/trash` bin. Drop it
 close the bin, and after a short delay they're deleted forever — with a window to grab them back if you
 change your mind.
 
+<p align="center">
+  <img src="https://cdn.modrinth.com/data/DIFYl3y6/images/6707259569125dee7652250728c39912d8f0f7dd.webp" alt="Open the bin with /trash (vanilla client)" width="32%" />
+  <img src="https://cdn.modrinth.com/data/DIFYl3y6/images/34cbb2f9901a072cfba48317e276512c1ea75b58.webp" alt="One-click inventory icon (client mod)" width="32%" />
+  <img src="https://cdn.modrinth.com/data/DIFYl3y6/images/506badd830ed22e53247e460eb299619d3ef9969.webp" alt="Auto-delete blacklist (instant clean)" width="32%" />
+</p>
+
 The whole `/trash` feature is **server-side**, so it works for players on **vanilla (unmodded) clients**.
 Installing the mod **on the client** adds quality-of-life extras.
 
@@ -83,3 +89,9 @@ Requires JDK 25. `./gradlew build` → `build/libs/trashventory-<version>.jar`.
 
 ## Credits
 Made by **dev-limucc** (`dev.limucc`). Licensed under MIT.
+
+## Gallery
+
+<p align="center">
+  <img src="https://cdn.modrinth.com/data/DIFYl3y6/images/ae4863a2830212efc788bc8593df2ea2f52c09d3.png" alt="Settings GUI" width="70%" />
+</p>
