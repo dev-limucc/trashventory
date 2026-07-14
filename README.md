@@ -1,5 +1,7 @@
 # Trashventory
 
+[![build](https://github.com/dev-limucc/trashventory/actions/workflows/build.yml/badge.svg)](https://github.com/dev-limucc/trashventory/actions/workflows/build.yml)
+
 A Fabric mod for **Minecraft 26.1.2** that adds a personal `/trash` bin. Drop items you don't want,
 close the bin, and after a short delay they're deleted forever — with a window to grab them back if you
 change your mind.
