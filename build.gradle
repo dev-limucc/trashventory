@@ -1,9 +1,26 @@
+// Multi-version Fabric build (all targets are unobfuscated 26.x -> the non-remapping 'net.fabricmc.fabric-loom').
+// Build one MC target with:  gradlew build "-Ptarget=<key>"     (default: 26.2)
 plugins {
     id 'net.fabricmc.fabric-loom' version "${loom_version}"
     id 'maven-publish'
 }
 
-version = project.mod_version
+// ---- multi-version target matrix --------------------------------------------
+// Each jar covers the 'range' it declares in fabric.mod.json. 'overlays' are per-era source dirs under
+// src/{main,client}/versions/<name>/java (compiled only for the targets that list them).
+def TARGETS = [
+    '26.1.2': [range: '~26.1', fapi: '0.150.0+26.1.2', modmenu: '18.0.0-beta.1', java: 25, loaderReq: '>=0.19.2', overlays: ['nav-legacy']],
+    '26.2':   [range: '~26.2', fapi: '0.154.2+26.2',   modmenu: '20.0.0',        java: 25, loaderReq: '>=0.19.3', overlays: ['nav-262']],
+    '26.3':   [range: '~26.3', fapi: '0.165.2+26.3',   modmenu: '21.0.0',        java: 25, loaderReq: '>=0.20.1', loader: '0.20.1', overlays: ['nav-262']],
+]
+
+def targetVer = (findProperty('target') ?: '26.2').toString()
+def t = TARGETS[targetVer]
+if (t == null) throw new GradleException("Unknown -Ptarget=${targetVer}. Known targets: ${TARGETS.keySet()}")
+
+def loaderVer = (t.loader ?: project.loader_version).toString()
+
+version = "${project.mod_version}+mc${targetVer}"
 group   = project.maven_group
 
 base {
@@ -21,38 +38,89 @@ loom {
     }
 }
 
+// Client gametest (runClientGameTest): src/gametest. Never packaged into the release jar.
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "trashventory-test"
+        enableGameTests = false
+        enableClientGameTests = true
+        eula = true
+    }
+}
+
+// dev convenience:  gradlew runClient "-PquickPlay=New World"  auto-joins that singleplayer save
+if (findProperty('quickPlay')) {
+    loom.runs.client.programArgs('--quickPlaySingleplayer', findProperty('quickPlay').toString())
+    loom.runs.client.programArgs('--username', 'TrashDev')
+}
+
+// ---- production run: launches the BUILT release jar (plus Fabric API + Mod Menu) in a vanilla-style client ----
+//   gradlew runProductionClient "-Ptarget=26.3" ["-PprodWorld=<save folder name under run/prod/saves>"]
+configurations {
+    prodMods {
+        transitive = false
+        canBeConsumed = false
+    }
+}
+
+tasks.register('runProductionClient', net.fabricmc.loom.task.prod.ClientProductionRunTask) {
+    group = 'fabric'
+    description = 'Launch the built jar in a production (non-dev) client'
+    mods.from(tasks.named('jar'))
+    mods.from(configurations.prodMods)
+    runDir = layout.projectDirectory.dir('run/prod')
+    minecraftVersion = targetVer
+    if (findProperty('prodWorld')) {
+        programArgs.addAll('--quickPlaySingleplayer', findProperty('prodWorld').toString())
+    }
+}
+
+// version-specific source overlays
+t.overlays.each {
+    sourceSets.main.java.srcDir "src/main/versions/${it}/java"
+    sourceSets.client.java.srcDir "src/client/versions/${it}/java"
+}
+
 repositories {
     mavenCentral()
     maven { url = "https://api.modrinth.com/maven" }
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    implementation "maven.modrinth:modmenu:${project.modmenu_version}"
+    prodMods "net.fabricmc.fabric-api:fabric-api:${t.fapi}"
+    prodMods "maven.modrinth:modmenu:${t.modmenu}"
+    minecraft "com.mojang:minecraft:${targetVer}"
 
-    // MixinExtras: @ModifyReturnValue gives zero-allocation hot-path injections.
-    // Fabric Loader 0.19.2 bundles MixinExtras at runtime, so we only need it at compile time.
+    implementation "net.fabricmc:fabric-loader:${loaderVer}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${t.fapi}"
+    implementation "maven.modrinth:modmenu:${t.modmenu}"
+
+    // MixinExtras: compile-time only (Fabric Loader bundles it at runtime).
     compileOnly "io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}"
     annotationProcessor "io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}"
 }
 
 processResources {
-    def version = project.version
-    inputs.property "version", version
+    def props = [
+        version   : project.version.toString(),
+        mc_range  : t.range,
+        java_req  : t.java.toString(),
+        loader_req: t.loaderReq,
+    ]
+    inputs.properties props
     filesMatching("fabric.mod.json") {
-        expand "version": version
+        expand props
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 25
+    it.options.release = t.java
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.toVersion(t.java)
+    targetCompatibility = JavaVersion.toVersion(t.java)
 }
 
 jar {

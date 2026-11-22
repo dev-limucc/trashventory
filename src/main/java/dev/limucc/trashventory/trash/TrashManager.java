@@ -248,6 +248,20 @@ public final class TrashManager {
         return PlayerSettingsStore.get(player.getUUID()).showMessage;
     }
 
+    /**
+     * Push the server's current limits to every online modded client. Called after an admin command changes the
+     * config, so open client GUIs (timer cap, instant/override notices) never show stale limits until the next join.
+     */
+    public static void broadcastConfig(MinecraftServer mcServer) {
+        if (mcServer == null) return;
+        TrashConfigPayload payload = configPayload();
+        for (ServerPlayer p : mcServer.getPlayerList().getPlayers()) {
+            if (ServerPlayNetworking.canSend(p, TrashConfigPayload.TYPE)) {
+                ServerPlayNetworking.send(p, payload);
+            }
+        }
+    }
+
     public static TrashConfigPayload configPayload() {
         TrashConfig c = TrashConfigManager.get();
         return new TrashConfigPayload(c.removeDelaySeconds, c.countdownEnabled, c.doubleChest,

@@ -147,6 +147,7 @@ public final class TrashCommands {
     private static int setDouble(CommandContext<CommandSourceStack> ctx, boolean dbl) {
         TrashConfigManager.get().doubleChest = dbl;
         TrashConfigManager.save();
+        TrashManager.broadcastConfig(ctx.getSource().getServer());
         return admin(ctx, "Trash chest size set to " + (dbl ? "DOUBLE (54 slots)" : "SINGLE (27 slots)")
                 + ". Applies to bins opened from now on.");
     }
@@ -154,6 +155,7 @@ public final class TrashCommands {
     private static int adminTimerOff(CommandContext<CommandSourceStack> ctx) {
         TrashConfigManager.get().countdownEnabled = false;
         TrashConfigManager.save();
+        TrashManager.broadcastConfig(ctx.getSource().getServer());
         return admin(ctx, "Server trash timer OFF — items are deleted instantly on close for everyone.");
     }
 
@@ -163,6 +165,7 @@ public final class TrashCommands {
         c.removeDelaySeconds = sec;
         c.countdownEnabled = sec > 0;
         TrashConfigManager.save();
+        TrashManager.broadcastConfig(ctx.getSource().getServer());
         return admin(ctx, sec > 0 ? "Server trash deletion delay set to " + sec + "s."
                 : "Server trash timer set to 0 — instant deletion on close.");
     }
@@ -170,17 +173,20 @@ public final class TrashCommands {
     private static int adminMessage(CommandContext<CommandSourceStack> ctx, boolean on) {
         TrashConfigManager.get().showCloseMessage = on;
         TrashConfigManager.save();
+        TrashManager.broadcastConfig(ctx.getSource().getServer());
         return admin(ctx, "Trash close message " + (on ? "ENABLED" : "DISABLED") + " for all players.");
     }
 
     private static int adminOverride(CommandContext<CommandSourceStack> ctx, boolean on) {
         TrashConfigManager.get().allowClientOverride = on;
         TrashConfigManager.save();
+        TrashManager.broadcastConfig(ctx.getSource().getServer());
         return admin(ctx, "Player personal-timer override " + (on ? "ALLOWED" : "DISALLOWED") + ".");
     }
 
     private static int adminReload(CommandContext<CommandSourceStack> ctx) {
         TrashConfigManager.load();
+        TrashManager.broadcastConfig(ctx.getSource().getServer());
         return admin(ctx, "Trashventory config reloaded from disk.");
     }
 

@@ -3,14 +3,18 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ['26.1.2', '26.2', '26.3']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "25"
-      - run: chmod +x gradlew && ./gradlew build --no-daemon
+      - run: chmod +x gradlew && ./gradlew build --no-daemon "-Ptarget=${{ matrix.target }}"
       - uses: actions/upload-artifact@v4
         with:
-          name: jars
+          name: jars-${{ matrix.target }}
           path: build/libs/*.jar

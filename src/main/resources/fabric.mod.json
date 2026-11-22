@@ -17,9 +17,9 @@
     "modmenu": ["dev.limucc.trashventory.client.ModMenuIntegration"]
   },
   "depends": {
-    "fabricloader": ">=0.19.3",
-    "minecraft":    "~26.2",
-    "java":         ">=25",
+    "fabricloader": "${loader_req}",
+    "minecraft":    "${mc_range}",
+    "java":         ">=${java_req}",
     "fabric-api":   "*"
   },
   "suggests": {

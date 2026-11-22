@@ -1,5 +1,7 @@
 package dev.limucc.trashventory.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import dev.limucc.trashventory.client.compat.ScreenNav;
 import dev.limucc.trashventory.client.config.ClientConfig;
 import dev.limucc.trashventory.client.config.ClientConfigManager;
 import dev.limucc.trashventory.client.gui.widget.FlatButton;
@@ -298,7 +300,7 @@ public class TrashventoryScreen extends Screen {
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) return true;
         double mx = event.x(), my = event.y();
-        if (event.button() != 0) return false;
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) return false;
 
         if (doneBtn.contains(mx, my)) { this.onClose(); return true; }
         if (infoBtn.contains(mx, my)) {
@@ -339,6 +341,6 @@ public class TrashventoryScreen extends Screen {
     @Override
     public void onClose() {
         saveAndSync();
-        this.minecraft.gui.setScreen(this.parent);
+        ScreenNav.open(this.minecraft, this.parent);
     }
 }

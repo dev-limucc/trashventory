@@ -2,6 +2,7 @@ package dev.limucc.trashventory.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.limucc.trashventory.Trashventory;
+import dev.limucc.trashventory.client.compat.ScreenNav;
 import dev.limucc.trashventory.client.config.ClientConfigManager;
 import dev.limucc.trashventory.client.gui.TrashventoryScreen;
 import dev.limucc.trashventory.client.gui.widget.GearButton;
@@ -57,7 +58,7 @@ public class TrashventoryClient implements ClientModInitializer {
             Minecraft mc = Minecraft.getInstance();
             mc.execute(() -> {
                 trashContainerId = payload.containerId();
-                addGearIfTrash(mc, mc.gui.screen());   // bin may already be on screen when this arrives
+                addGearIfTrash(mc, ScreenNav.current(mc));   // bin may already be on screen when this arrives
             });
         });
 
@@ -68,14 +69,14 @@ public class TrashventoryClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (OPEN_TRASH_KEY.consumeClick()) {
-                if (mc.gui.screen() == null && mc.getConnection() != null) mc.getConnection().sendCommand("trash");
+                if (ScreenNav.current(mc) == null && mc.getConnection() != null) mc.getConnection().sendCommand("trash");
             }
             while (OPEN_SETTINGS_KEY.consumeClick()) {
-                if (mc.gui.screen() == null) mc.gui.setScreen(new TrashventoryScreen(null));
+                if (ScreenNav.current(mc) == null) ScreenNav.open(mc, new TrashventoryScreen(null));
             }
             // Forget the trash container id once that bin is no longer the open screen, so a later chest
             // that happens to reuse the same numeric id can't inherit the gear.
-            if (trashContainerId != -1 && !isTrashScreen(mc.gui.screen())) trashContainerId = -1;
+            if (trashContainerId != -1 && !isTrashScreen(ScreenNav.current(mc))) trashContainerId = -1;
         });
 
         // The server pushes our authoritative settings on join, so we don't send anything here.
@@ -133,7 +134,7 @@ public class TrashventoryClient implements ClientModInitializer {
         int top = (screen.height - imageHeight) / 2;
         Screens.getWidgets(screen).add(new GearButton(
                 left + imageWidth / 2 - 6, top + 3, 13, 13, GEAR_SPRITES,   // 1:1 with the 13px sprite (crisp)
-                b -> client.gui.setScreen(new TrashventoryScreen(null))));
+                b -> ScreenNav.open(client, new TrashventoryScreen(null))));
         return true;
     }
 
